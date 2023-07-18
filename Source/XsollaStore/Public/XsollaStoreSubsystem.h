@@ -918,6 +918,7 @@ protected:
 	/** Pending PayStation URL to be opened in browser */
 	FString PengindPaystationUrl;
 
+	UPROPERTY()
 	UXsollaStoreBrowserWrapper* MyBrowser;
 
 private:
