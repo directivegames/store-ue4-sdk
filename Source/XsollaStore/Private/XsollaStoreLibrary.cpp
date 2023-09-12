@@ -9,6 +9,9 @@
 #include "Engine/DataTable.h"
 #include "Kismet/KismetTextLibrary.h"
 #include "UObject/ConstructorHelpers.h"
+#if 1 // WITH_DIRECTIVE
+#include "Misc/EngineVersionComparison.h"
+#endif
 
 UDataTable* UXsollaStoreLibrary::CurrencyLibrary;
 
@@ -40,9 +43,15 @@ FString UXsollaStoreLibrary::FormatPrice(float Amount, const FString& Currency /
 	const FXsollaStoreCurrency* Row = GetCurrencyLibrary()->FindRow<FXsollaStoreCurrency>(FName(*Currency), FString());
 	if (Row)
 	{
+#if UE_VERSION_OLDER_THAN(5, 1, 0) // WITH_DIRECTIVE
 		const FString SanitizedAmount = UKismetTextLibrary::Conv_FloatToText(Amount, ERoundingMode::HalfToEven,
 			false, true, 1, 324, Row->fractionSize, Row->fractionSize)
 											.ToString();
+#else
+		const FString SanitizedAmount = UKismetTextLibrary::Conv_DoubleToText(Amount, ERoundingMode::HalfToEven,
+			false, true, 1, 324, Row->fractionSize, Row->fractionSize)
+											.ToString();
+#endif
 		return Row->symbol.format.Replace(TEXT("$"), *Row->symbol.grapheme).Replace(TEXT("1"), *SanitizedAmount);
 	}
 

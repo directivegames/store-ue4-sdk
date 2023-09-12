@@ -13,6 +13,10 @@
 #include "XsollaUIBuilderSettings.h"
 #include "XsollaUIBuilderTypes.h"
 
+#if 1 // WITH_DIRECTIVE
+#include "Misc/EngineVersionComparison.h"
+#endif
+
 #define LOCTEXT_NAMESPACE "XsollaUIBuilderSettingsDetails"
 
 TSharedRef<IDetailCustomization> FXsollaUIBuilderSettingsDetails::MakeInstance()
@@ -109,7 +113,11 @@ void FXsollaUIBuilderSettingsDetails::CustomizeOneType(IDetailLayoutBuilder& Det
 
 void FXsollaUIBuilderSettingsDetails::UpdateDefaultConfigFile()
 {
+#if UE_VERSION_OLDER_THAN(5, 0, 0) // WITH_DIRECTIVE
 	UXsollaUIBuilderLibrary::GetUIBuilderSettings()->UpdateDefaultConfigFile();
+#else
+	UXsollaUIBuilderLibrary::GetUIBuilderSettings()->TryUpdateDefaultConfigFile();	
+#endif
 }
 
 #undef LOCTEXT_NAMESPACE
