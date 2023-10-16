@@ -11,7 +11,6 @@
 void FXsollaSettingsModule::StartupModule()
 {
 	// Register settings
-
 	XsollaSettings = GetMutableDefault<UXsollaProjectSettings>();
 
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
