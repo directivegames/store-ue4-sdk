@@ -616,7 +616,7 @@ struct XSOLLASTORE_API FStoreBundle
 #if 1 // WITH_DIRECTIVE
 	// Why was this a FString?
 	UPROPERTY(BlueprintReadOnly, Category = "Bundle")
-	bool is_free;
+	bool is_free = false;
 #else
 	UPROPERTY(BlueprintReadOnly, Category = "Bundle")
 	FString is_free;
