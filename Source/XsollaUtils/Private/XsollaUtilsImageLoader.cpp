@@ -35,6 +35,25 @@ void UXsollaUtilsImageLoader::LoadImage(const FString& URL, const FOnImageLoaded
 	{
 		if (PendingRequests.Contains(ResourceId))
 		{
+#if 1 // WITH_DIRECTIVE
+			TWeakObjectPtr<UXsollaUtilsImageLoader> WeakThis(this);
+			PendingRequests[ResourceId].AddLambda([WeakThis, URL, ResourceId, SuccessCallback, ErrorCallback](bool IsCompleted)
+			{
+				if (WeakThis.IsValid())
+				{
+					if (IsCompleted)
+					{
+						UE_LOG(LogXsollaUtils, VeryVerbose, TEXT("%s: Loaded from cache: %s"), *VA_FUNC_LINE, *ResourceId);
+						SuccessCallback.ExecuteIfBound(*WeakThis->ImageBrushes.Find(ResourceId)->Get(), URL);
+					}
+					else
+					{
+						UE_LOG(LogXsollaUtils, Error, TEXT("%s: Failed to get image"), *VA_FUNC_LINE);
+						ErrorCallback.ExecuteIfBound(URL);
+					}
+				}
+			});
+#else
 			PendingRequests[ResourceId].AddLambda([=](bool IsCompleted) {
 				if (IsCompleted)
 				{
@@ -47,6 +66,7 @@ void UXsollaUtilsImageLoader::LoadImage(const FString& URL, const FOnImageLoaded
 					ErrorCallback.ExecuteIfBound(URL);
 				}
 			});
+#endif
 		}
 		else
 		{
