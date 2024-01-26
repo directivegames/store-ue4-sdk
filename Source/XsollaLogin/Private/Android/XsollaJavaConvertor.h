@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Android/AndroidApplication.h"
-#include "Launch/Public/Android/AndroidJNI.h"
+#include "Runtime/Launch/Public/Android/AndroidJNI.h"
 #include "Android/AndroidJava.h"
 
 namespace XsollaJavaConvertor
