@@ -55,20 +55,22 @@ public class XsollaStore : ModuleRules
             PublicAdditionalFrameworks.Add(
             new Framework(
                 "XsollaSDKPaymentsKit",
-                "../IOS/XsollaSDKPaymentsKit.embeddedframework.zip"
+                "../IOS/XsollaSDKPaymentsKit.embeddedframework.zip",
+                "XsollaSDKPaymentsKit.framework" // WITH_DIRECTIVE
             )
             );
             PublicAdditionalFrameworks.Add(
             new Framework(
                 "XsollaSDKPaymentsKitObjectiveC",
-                "../IOS/XsollaSDKPaymentsKitObjectiveC.embeddedframework.zip"
+                "../IOS/XsollaSDKPaymentsKitObjectiveC.embeddedframework.zip",
+                "XsollaSDKPaymentsKitObjectiveC.framework" // WITH_DIRECTIVE
             )
             );
             PublicAdditionalFrameworks.Add(
             new Framework(
                 "XsollaSDKUtilities",
-                "../IOS/XsollaSDKUtilities.embeddedframework.zip"
-
+                "../IOS/XsollaSDKUtilities.embeddedframework.zip",
+                "XsollaSDKUtilities.framework" // WITH_DIRECTIVE
             )
             );
         }
