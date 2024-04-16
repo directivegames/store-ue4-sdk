@@ -39,10 +39,8 @@ public class XsollaLogin : ModuleRules
             PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private/Android"));
 
             PrivateDependencyModuleNames.AddRange(new string[] { "Launch" });
-            #if false // WITH_DIRECTIVE (Potential workaround for duplicate class error in Android builds on TeamCity)
             string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
             AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(PluginPath, "XsollaLogin_UPL.xml"));
-            #endif
         }
         if (Target.Platform == UnrealTargetPlatform.IOS)
         {
