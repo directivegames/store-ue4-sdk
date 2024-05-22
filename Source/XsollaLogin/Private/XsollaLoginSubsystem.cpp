@@ -1149,7 +1149,7 @@ void UXsollaLoginSubsystem::ModifyUserProfilePicture(const FString& AuthToken, U
 {
 	if (!IsValid(Picture))
 	{
-		ErrorCallback.Execute(-1, -1, "Picture is invalid.");
+		ErrorCallback.ExecuteIfBound(-1, -1, "Picture is invalid.");
 		return;
 	}
 
