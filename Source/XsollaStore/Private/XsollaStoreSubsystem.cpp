@@ -359,7 +359,7 @@ void UXsollaStoreSubsystem::LaunchPaymentConsole(UObject* WorldContextObject, co
 		UE_LOG(LogXsollaStore, Log, TEXT("%s: Loading Paystation: %s"), *VA_FUNC_LINE, *PaystationUrl);
 		MyBrowser = CreateWidget<UXsollaStoreBrowserWrapper>(WorldContextObject->GetWorld(), DefaultBrowserWidgetClass);
 		MyBrowser->OnBrowserClosed.BindLambda([&](bool bIsManually)
-		{ 
+		{
 			PaymentBrowserClosedCallback.ExecuteIfBound(bIsManually);
 		});
 		MyBrowser->AddToViewport(100000);
@@ -715,6 +715,31 @@ void UXsollaStoreSubsystem::GetBundles(const FString& Locale, const FString& Cou
 		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = CreateHttpRequest(Url, EXsollaHttpRequestVerb::VERB_GET, Token);
 		HttpRequest->OnProcessRequestComplete().BindUObject(this,
 			&UXsollaStoreSubsystem::GetListOfBundles_HttpRequestComplete, SuccessCallback, ErrorHandlersWrapper);
+		HttpRequest->ProcessRequest();
+	});
+
+	SuccessTokenUpdate.ExecuteIfBound(AuthToken, true);
+}
+
+void UXsollaStoreSubsystem::GetBundlesBySpecifiedGroup(const FString& ExternalId, const FString& Locale, const FString& Country, const TArray<FString>& AdditionalFields,
+		const FOnGetListOfBundlesBySpecifiedGroup& SuccessCallback, const FOnError& ErrorCallback, const int Limit, const int Offset, const FString& AuthToken)
+{
+	const FString Url = XsollaUtilsUrlBuilder(TEXT("https://store.xsolla.com/api/v2/project/{ProjectID}/items/bundle/group/{ExternalId}"))
+						.SetPathParam(TEXT("ProjectID"), ProjectID)
+						.SetPathParam(TEXT("ExternalId"), ExternalId.IsEmpty() ? TEXT("all") : ExternalId)
+						.AddStringQueryParam(TEXT("locale"), Locale)
+						.AddStringQueryParam(TEXT("country"), Country)
+						.AddArrayQueryParam(TEXT("additional_fields[]"), AdditionalFields)
+						.AddNumberQueryParam(TEXT("limit"), Limit)
+						.AddNumberQueryParam(TEXT("offset"), Offset)
+						.Build();
+
+	FOnTokenUpdate SuccessTokenUpdate;
+	SuccessTokenUpdate.BindLambda([&, Url, SuccessCallback, ErrorCallback](const FString& Token, bool bRepeatOnError)
+	{
+		const auto ErrorHandlersWrapper = FErrorHandlersWrapper(bRepeatOnError, SuccessTokenUpdate, ErrorCallback);
+		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = CreateHttpRequest(Url, EXsollaHttpRequestVerb::VERB_GET, Token);
+		HttpRequest->OnProcessRequestComplete().BindUObject(this, &UXsollaStoreSubsystem::GetListOfBundlesBySpecifiedGroup_HttpRequestComplete, SuccessCallback, ErrorHandlersWrapper);
 		HttpRequest->ProcessRequest();
 	});
 
@@ -1499,6 +1524,35 @@ void UXsollaStoreSubsystem::FillCartById_HttpRequestComplete(
 void UXsollaStoreSubsystem::GetListOfBundles_HttpRequestComplete(
 	FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse,
 	const bool bSucceeded, FOnGetListOfBundlesUpdate SuccessCallback, FErrorHandlersWrapper ErrorHandlersWrapper)
+{
+	XsollaHttpRequestError OutError;
+	FStoreListOfBundles ListOfBundles;
+
+	if (XsollaUtilsHttpRequestHelper::ParseResponseAsStruct(HttpRequest, HttpResponse, bSucceeded, FStoreListOfBundles::StaticStruct(), &ListOfBundles, OutError))
+	{
+		for (const auto& Bundle : ListOfBundles.items)
+		{
+			ItemsData.Items.Add(Bundle);
+		}
+
+		for (const auto& Bundle : ListOfBundles.items)
+		{
+			for (const auto& BundleGroup : Bundle.groups)
+			{
+				ItemsData.GroupIds.Add(BundleGroup.external_id);
+			}
+		}
+
+		SuccessCallback.ExecuteIfBound(ListOfBundles);
+	}
+	else
+	{
+		LoginSubsystem->HandleRequestError(OutError, ErrorHandlersWrapper);
+	}
+}
+
+void UXsollaStoreSubsystem::GetListOfBundlesBySpecifiedGroup_HttpRequestComplete(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse,
+	const bool bSucceeded, FOnGetListOfBundlesBySpecifiedGroup SuccessCallback, FErrorHandlersWrapper ErrorHandlersWrapper)
 {
 	XsollaHttpRequestError OutError;
 	FStoreListOfBundles ListOfBundles;
