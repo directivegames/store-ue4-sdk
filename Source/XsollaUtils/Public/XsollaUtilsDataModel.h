@@ -185,6 +185,18 @@ struct XSOLLAUTILS_API FXsollaStoreItemPromotion
 };
 
 USTRUCT(BlueprintType)
+struct XSOLLAUTILS_API FXsollaOfferPeriod
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Offer Period")
+	FString date_from;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Offer Period")
+	FString date_until;
+};
+
+USTRUCT(BlueprintType)
 struct XSOLLAUTILS_API FXsollaItemAttributeValue
 {
 	GENERATED_BODY()

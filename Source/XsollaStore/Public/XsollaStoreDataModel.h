@@ -639,6 +639,9 @@ struct XSOLLASTORE_API FStoreBundle
 
 	UPROPERTY(BlueprintReadOnly, Category = "Bundle")
 	FXsollaStoreItemLimits limits;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Bundle")
+	TArray<FXsollaOfferPeriod> periods;
 };
 
 USTRUCT(BlueprintType)
