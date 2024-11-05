@@ -97,6 +97,9 @@ struct XSOLLASTORE_API FStoreBundleContent
 
 	UPROPERTY(BlueprintReadOnly, Category = "Bundle")
 	TArray<FXsollaVirtualCurrencyPrice> virtual_prices;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Bundle")
+	TArray<FXsollaItemAttribute> attributes;
 };
 
 USTRUCT(BlueprintType)
