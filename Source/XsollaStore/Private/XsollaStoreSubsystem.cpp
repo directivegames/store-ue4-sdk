@@ -210,7 +210,7 @@ void UXsollaStoreSubsystem::GetAllItemsList(const FString& Locale, const FOnGetI
 
 void UXsollaStoreSubsystem::FetchPaymentToken(const FString& AuthToken, const FString& ItemSKU,
 	const FString& Currency, const FString& Country, const FString& Locale, const FXsollaParameters CustomParameters,
-	const FOnFetchTokenSuccess& SuccessCallback, const FOnError& ErrorCallback, const int32 Quantity, const FString& ExternalId)
+	const FOnFetchTokenSuccess& SuccessCallback, const FOnError& ErrorCallback, const int32 Quantity, const FString& ExternalId, const FString& SteamUserId)
 {
 	TSharedPtr<FJsonObject> RequestDataJson = PreparePaymentTokenRequestPayload(Currency, Country, Locale, ExternalId, CustomParameters);
 
@@ -222,25 +222,15 @@ void UXsollaStoreSubsystem::FetchPaymentToken(const FString& AuthToken, const FS
 							.Build();
 
 	FOnTokenUpdate SuccessTokenUpdate;
-	SuccessTokenUpdate.BindLambda([&, Url, RequestDataJson, SuccessCallback, ErrorCallback, SuccessTokenUpdate](const FString& Token, bool bRepeatOnError)
+	SuccessTokenUpdate.BindLambda([&, Url, SteamUserId, RequestDataJson, SuccessCallback, ErrorCallback, SuccessTokenUpdate](const FString& Token, bool bRepeatOnError)
 	{
 		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = CreateHttpRequest(Url, EXsollaHttpRequestVerb::VERB_POST, Token, SerializeJson(RequestDataJson));
 
-		const UXsollaProjectSettings* Settings = FXsollaSettingsModule::Get().GetSettings();
-
-		if (Settings->BuildForSteam)
+		if (!SteamUserId.IsEmpty())
 		{
-			FString SteamId;
-			FString OutError;
-
-			if (!UXsollaLoginLibrary::IsSteamBuildValid(OutError) || !GetSteamUserId(Token, SteamId, OutError))
-			{
-				ErrorCallback.ExecuteIfBound(0, 0, OutError);
-				return;
-			}
-
-			HttpRequest->SetHeader(TEXT("x-steam-userid"), SteamId);
+			HttpRequest->SetHeader(TEXT("x-steam-userid"), SteamUserId);
 		}
+
 		const auto ErrorHandlersWrapper = FErrorHandlersWrapper(bRepeatOnError, SuccessTokenUpdate, ErrorCallback);
 		HttpRequest->OnProcessRequestComplete().BindUObject(this, &UXsollaStoreSubsystem::FetchPaymentToken_HttpRequestComplete, SuccessCallback, ErrorHandlersWrapper);
 		HttpRequest->ProcessRequest();

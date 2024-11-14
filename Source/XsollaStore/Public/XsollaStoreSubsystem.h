@@ -196,7 +196,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Xsolla|Store", meta = (AutoCreateRefTerm = "SuccessCallback, ErrorCallback"))
 	void FetchPaymentToken(const FString& AuthToken, const FString& ItemSKU,
 		const FString& Currency, const FString& Country, const FString& Locale, const FXsollaParameters CustomParameters,
-		const FOnFetchTokenSuccess& SuccessCallback, const FOnError& ErrorCallback, const int32 Quantity = 1, const FString& ExternalId = TEXT(""));
+		const FOnFetchTokenSuccess& SuccessCallback, const FOnError& ErrorCallback, const int32 Quantity = 1, const FString& ExternalId = TEXT(""), const FString& SteamUserId = TEXT(""));
 
 	/** Creates an order with items from the cart with the specified ID or from the cart of the current user. Returns the payment token and order ID.
 	 * [More about the use cases](https://developers.xsolla.com/sdk/unreal-engine/item-purchase/cart-purchase/).
